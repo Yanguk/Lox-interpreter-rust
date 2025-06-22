@@ -78,32 +78,47 @@ fn main() {
 
     match command.as_str() {
         "tokenize" => {
-            let file_contents = fs::read_to_string(filename).unwrap_or_else(|_| {
-                eprintln!("Failed to read file {}", filename);
-                String::new()
-            });
-
-            if !file_contents.is_empty() {
-                for (line_num, line) in file_contents.lines().enumerate() {
-                    for c in line.chars() {
-                        if let Some(token) = Token::from_char(c) {
-                            println!("{}", token);
-                        } else if !c.is_whitespace() {
-                            let err = LexError::SingleTokenError {
-                                at: c,
-                                line: line_num + 1,
-                            };
-
-                            println!("{}", err);
-                        }
-                    }
-                }
-            }
-
-            println!("EOF  null");
+            tokenize_file(filename);
         }
         _ => {
             eprintln!("Unknown command: {}", command);
         }
+    }
+}
+
+fn tokenize_file(filename: &str) -> () {
+    let file_contents = fs::read_to_string(filename).unwrap();
+
+    let results = file_contents
+        .lines()
+        .enumerate()
+        .map(|(line_num, line)| (line_num, line.chars()))
+        .flat_map(|(line_num, chars)| {
+            chars
+                .map(move |c| {
+                    if let Some(result) = Token::from_char(c) {
+                        Ok(result)
+                    } else {
+                        Err(LexError::SingleTokenError {
+                            at: c,
+                            line: line_num + 1,
+                        })
+                    }
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+
+    results.iter().for_each(|result| match result {
+        Ok(token) => println!("{}", token),
+        Err(err) => eprintln!("{}", err),
+    });
+
+    println!("EOF  null");
+
+    let is_error = results.iter().any(|e| e.is_err());
+
+    if is_error {
+        std::process::exit(65);
     }
 }
