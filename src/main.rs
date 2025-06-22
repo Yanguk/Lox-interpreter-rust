@@ -1,6 +1,20 @@
 use std::env;
 use std::fs;
 
+enum LexError {
+    SingleTokenError { at: char, line: usize },
+}
+
+impl std::fmt::Display for LexError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SingleTokenError { at, line } => {
+                write!(f, "[line {}] Error: Unexpected character: {}", line, at)
+            }
+        }
+    }
+}
+
 enum Token {
     Comma,
     Dot,
@@ -56,6 +70,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 3 {
         eprintln!("Usage: {} tokenize <filename>", args[0]);
+        return;
     }
 
     let command = &args[1];
@@ -69,19 +84,20 @@ fn main() {
             });
 
             if !file_contents.is_empty() {
-                file_contents
-                    .chars()
-                    .map(Token::from_char)
-                    .for_each(|token| {
-                        if let Some(token) = token {
+                for (line_num, line) in file_contents.lines().enumerate() {
+                    for c in line.chars() {
+                        if let Some(token) = Token::from_char(c) {
                             println!("{}", token);
-                        } else {
-                            eprintln!(
-                                "Invalid character in file: {}",
-                                token.unwrap_or(Token::LeftParen)
-                            );
+                        } else if !c.is_whitespace() {
+                            let err = LexError::SingleTokenError {
+                                at: c,
+                                line: line_num + 1,
+                            };
+
+                            println!("{}", err);
                         }
-                    });
+                    }
+                }
             }
 
             println!("EOF  null");
