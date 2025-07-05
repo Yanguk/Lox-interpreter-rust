@@ -42,47 +42,36 @@ impl<'a> Scanner<'a> {
 
             match char {
                 ',' => {
-                    println!("COMMA , null");
                     self.tokens.push(Token::Comma);
                 }
                 '.' => {
-                    println!("DOT . null");
                     self.tokens.push(Token::Dot);
                 }
                 '-' => {
-                    println!("MINUS - null");
                     self.tokens.push(Token::Minus);
                 }
                 '+' => {
-                    println!("PLUS + null");
                     self.tokens.push(Token::Plus);
                 }
                 ';' => {
-                    println!("SEMICOLON ; null");
                     self.tokens.push(Token::Semicolon);
                 }
                 '/' => {
-                    println!("SLASH / null");
                     self.tokens.push(Token::Slash);
                 }
                 '*' => {
-                    println!("STAR * null");
                     self.tokens.push(Token::Star);
                 }
                 '(' => {
-                    println!("LEFT_PAREN ( null");
                     self.tokens.push(Token::LeftParen);
                 }
                 ')' => {
-                    println!("RIGHT_PAREN ) null");
                     self.tokens.push(Token::RightParen);
                 }
                 '{' => {
-                    println!("LEFT_BRACE {{ null");
                     self.tokens.push(Token::LeftBrace);
                 }
                 '}' => {
-                    println!("RIGHT_BRACE }} null");
                     self.tokens.push(Token::RightBrace);
                 }
                 '=' => {
